@@ -1238,7 +1238,7 @@
 		C2B72B15245349C500D03ABD /* PLCrashLogWriterEncodingTests.pb-c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "PLCrashLogWriterEncodingTests.pb-c.h"; sourceTree = "<group>"; };
 		C2B72B2424534EE700D03ABD /* protobuf-c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "protobuf-c.h"; sourceTree = "<group>"; };
 		C2B72B2524534EE700D03ABD /* protobuf-c.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "protobuf-c.c"; sourceTree = "<group>"; };
-		C2B90DA12456FE8200834AFB /* PLCrashReporter.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = PLCrashReporter.podspec; sourceTree = "<group>"; };
+		C2B90DA12456FE8200834AFB /* PLCrashReporter.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = PLCrashReporter.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		C2B90DA22456FE8200834AFB /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		C2B90DA32456FE8200834AFB /* CHANGELOG.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
 		C2B90DA5245714E900834AFB /* generate-documentation.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "generate-documentation.sh"; sourceTree = "<group>"; };
