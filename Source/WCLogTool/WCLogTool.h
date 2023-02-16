@@ -50,6 +50,9 @@ typedef void(^WCLogCallbackType)(WCLogLevel level, NSString *message);
 
 @interface WCLogTool : NSObject
 
+/**
+ Default is WCLogLevelInfo
+ */
 @property (nonatomic, assign) WCLogLevel currentConsoleLogLevel;
 
 @property (nonatomic, copy, readonly) NSString *currentLogFilePath;
@@ -58,6 +61,10 @@ typedef void(^WCLogCallbackType)(WCLogLevel level, NSString *message);
  */
 @property (nonatomic, assign) BOOL showInterpolatedVariable;
 /**
+ Default is YES
+ */
+@property (nonatomic, assign) BOOL showOrderNumber;
+/**
  Default is NO
  */
 @property (nonatomic, assign) BOOL showShortLogTag;
@@ -65,6 +72,10 @@ typedef void(^WCLogCallbackType)(WCLogLevel level, NSString *message);
  Default is YES
  */
 @property (nonatomic, assign) BOOL showSourceFileLocation;
+/**
+ Default is YES
+ */
+@property (nonatomic, assign) BOOL showTimestamp;
 /**
  Default is YES
  */

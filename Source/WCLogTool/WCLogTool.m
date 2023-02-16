@@ -16,6 +16,7 @@
 @interface WCLogTool ()
 
 @property (nonatomic, strong) NSDateFormatter *formatter;
+@property (nonatomic, strong) NSDateFormatter *timeZoneFormatter;
 @property (nonatomic, strong) NSDictionary *logLevelTags;
 @property (nonatomic, strong) NSDictionary *logLevelShortTags;
 
@@ -44,13 +45,23 @@ static long long unsigned sOrder;
 - (instancetype)init {
     self = [super init];
     if (self) {
-        _currentConsoleLogLevel = WCLogLevelDebug;
+        _currentConsoleLogLevel = WCLogLevelInfo;
         
-        NSDateFormatter *formatter = [NSDateFormatter new];
-        formatter.dateFormat = @"YYYY-MM-dd HH:mm:ss.SSSSSSZZ";
-        formatter.timeZone = [NSTimeZone systemTimeZone];
-        formatter.locale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
-        _formatter = formatter;
+        _formatter = ({
+            NSDateFormatter *formatter = [NSDateFormatter new];
+            formatter.dateFormat = @"YYYY-MM-dd HH:mm:ss";
+            formatter.timeZone = [NSTimeZone systemTimeZone];
+            formatter.locale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
+            formatter;
+        });
+        
+        _timeZoneFormatter = ({
+            NSDateFormatter *formatter = [NSDateFormatter new];
+            formatter.dateFormat = @"ZZ";
+            formatter.timeZone = [NSTimeZone systemTimeZone];
+            formatter.locale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
+            formatter;
+        });
         
         _logLevelTags = @{
                           @(WCLogLevelDebug): @"DEBUG",
@@ -74,8 +85,10 @@ static long long unsigned sOrder;
         
         _showCallerFunction = YES;
         _showInterpolatedVariable = YES;
+        _showOrderNumber = YES;
         _showShortLogTag = NO;
         _showSourceFileLocation = YES;
+        _showTimestamp = YES;
         
         _enableLogToFile = YES;
         
@@ -87,7 +100,9 @@ static long long unsigned sOrder;
 #pragma mark - Getter
 
 - (NSString *)currentLogFilePath {
-    _currentLogFilePath = [NSString stringWithFormat:@"%@/%@.%@", _logDirPath, _logFilePrefix, _logFileExtension];
+    if (!_currentLogFilePath) {
+        _currentLogFilePath = [NSString stringWithFormat:@"%@/%@.%@", _logDirPath, _logFilePrefix, _logFileExtension];
+    }
     
     return _currentLogFilePath;
 }
@@ -109,7 +124,7 @@ static long long unsigned sOrder;
     }
 }
 
-#pragma mark - 
+#pragma mark -
 
 - (NSString *)levelTagWithLogLevel:(WCLogLevel)logLevel {
     return _logLevelTags[@(logLevel)];
@@ -157,7 +172,28 @@ static long long unsigned sOrder;
     }
     
     NSDate *timestamp = [NSDate date];
-    NSString *timestampString = [[WCLogTool sharedInstance].formatter stringFromDate:timestamp];
+
+    NSString *timestampString = ({
+        NSString *string = @"";
+        
+        if (_showTimestamp) {
+            // Issue: NSDateFormatter not support microseconds formatting which ss.SSSSSS always become ss.SSS000
+            // Solution: https://stackoverflow.com/questions/43123944/how-to-configure-dateformatter-to-capture-microseconds
+            NSInteger nanoseconds = [[NSCalendar autoupdatingCurrentCalendar] component:NSCalendarUnitNanosecond fromDate:timestamp];
+            long int microseconds = lrint(nanoseconds / 1000.0);
+            
+            // Note: Subtract nanoseconds from timestamp to ensure string(from: Date) doesn't attempt faulty rounding.
+            NSDate *newTimestamp = [[NSCalendar autoupdatingCurrentCalendar] dateByAddingUnit:NSCalendarUnitNanosecond value:-nanoseconds toDate:timestamp options:kNilOptions];
+            
+            NSString *dateStringWithSeconds = [[WCLogTool sharedInstance].formatter stringFromDate:newTimestamp];
+            NSString *timeZone = [[WCLogTool sharedInstance].timeZoneFormatter stringFromDate:newTimestamp];
+            
+            string = [[NSString alloc] initWithFormat:@"%@.%06ld%@", dateStringWithSeconds, microseconds, timeZone];
+        }
+        
+        string;
+    });
+    
     const char *fileName = ((strrchr(file, '/') ?: file - 1) + 1);
     
     if (_showInterpolatedVariable) {
@@ -171,8 +207,12 @@ static long long unsigned sOrder;
         // Note: componentable log message
         // full format for printf: @"%s %llu:[%s][%s:%d]`%s: %s"
         // 2022-12-12 11:01:14.923000+0800 1:[DEBUG][PrintLogInCFunctionsViewController.m:18]`void callAFunction(NSString *__strong): a test for calling c function with `some parameters`
-        [stringM appendFormat:@"%@ ", timestampString];
-        [stringM appendFormat:@"%llu:", sOrder++];
+        if (_showTimestamp) {
+            [stringM appendFormat:@"%@ ", timestampString];
+        }
+        if (_showOrderNumber) {
+            [stringM appendFormat:@"%llu:", sOrder++];
+        }
         [stringM appendFormat:@"[%@]", (_showShortLogTag == YES ? [[WCLogTool sharedInstance] levelShortTagWithLogLevel:level] : [[WCLogTool sharedInstance] levelTagWithLogLevel:level])];
         if (_showSourceFileLocation) {
             [stringM appendFormat:@"[%s:%d]", fileName, lineNumber];
