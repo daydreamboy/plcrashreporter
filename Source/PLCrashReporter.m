@@ -46,6 +46,8 @@
 #import "PLCrashAsyncMachExceptionInfo.h"
 #import "PLCrashReporterNSError.h"
 
+#import "WCLogTool.h"
+
 #import <fcntl.h>
 #import <dlfcn.h>
 #import <mach-o/dyld.h>
@@ -148,6 +150,8 @@ static PLCrashReporterCallbacks crashCallbacks = {
  * @return Returns PLCRASH_ESUCCESS on success, or an appropriate error value if the report could not be written.
  */
 static plcrash_error_t plcrash_write_report (plcrashreporter_handler_ctx_t *sigctx, thread_t crashed_thread, plcrash_async_thread_state_t *thread_state, plcrash_log_signal_info_t *siginfo) {
+    WCLogD_CS(@"plcrash_write_report");
+    
     plcrash_async_file_t file;
     plcrash_error_t err;
 
@@ -688,6 +692,8 @@ static plcrash_error_t plcr_live_report_callback (plcrash_async_thread_state_t *
  * @todo Implement in-memory, rather than requiring writing of the report to disk.
  */
 - (NSData *) generateLiveReportWithThread: (thread_t) thread error: (NSError **) outError {
+    WCLogD(@"generateLiveReportWithThread");
+    
     plcrash_log_writer_t writer;
     plcrash_async_file_t file;
     plcrash_error_t err;
